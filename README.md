@@ -5,7 +5,7 @@ A free HTML5-based image pairing activity that allows authors to create pairs of
 
 ## Screenshots
 
-<img src="screenshots/Screenshot_2019-11-29 Image pairing.png>
+<img src="https://gitlab.com/icfoss/H5P-ImagePair/raw/master/screenshots/Screenshot_2019-11-29%20Image%20pairing.png" />
 
 ## License
 
