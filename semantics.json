@@ -8,6 +8,15 @@
     "importance": "high"
   },
   {
+    "label": "Audio for task description",
+    "name": "taskDescriptionAudio",
+    "type": "audio",
+    "description": "Add an audio version for the task description.",
+    "importance": "medium",
+    "optional": true,
+    "widgetExtensions": ["AudioRecorder"]
+  },
+  {
     "name": "cards",
     "type": "list",
     "widgets": [
@@ -42,6 +51,15 @@
           "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users."
         },
         {
+          "label": "Audio",
+          "name": "audio",
+          "type": "audio",
+          "description": "Will be played when starting to drag.",
+          "importance": "medium",
+          "optional": true,
+          "widgetExtensions": ["AudioRecorder"]
+        },
+        {
           "name": "match",
           "type": "image",
           "label": "Matching Image",
@@ -57,6 +75,15 @@
           "importance": "low",
           "optional": true,
           "description": "Describe what can be seen in the photo. The text is read by text-to-speech tools needed by visually impaired users."
+        },
+        {
+          "label": "Audio",
+          "name": "matchAudio",
+          "type": "audio",
+          "description": "Will be played when clicked.",
+          "importance": "medium",
+          "optional": true,
+          "widgetExtensions": ["AudioRecorder"]
         }
       ]
     }

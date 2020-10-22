@@ -8,10 +8,10 @@
    * @param {Object} image
    * @param {number} id
    * @param {string} alt
+   * @param {object} [audio] Audio object.
    */
 
-  ImagePair.Card = function(image, id, alt) {
-
+  ImagePair.Card = function(image, id, alt, audio) {
     // @alias H5P.ImagePair.Card#
     var self = this;
 
@@ -37,6 +37,8 @@
     } else {
       width = height = '100%';
     }
+
+    self.audio = ImagePair.Card.createAudio(audio, id);
 
     /**
      * get the image element of the current card
@@ -218,6 +220,10 @@
         '</div>' +
         '</li>').appendTo($container);
 
+      // Allow mate cards to play audio
+      if (self.audio) {
+        self.$card.addClass('hasAudio');
+      }
 
       self.$card.on('keydown', function(event) {
 
@@ -276,6 +282,19 @@
         self.trigger('selected');
       }).end();
 
+      self.$card.on('mousedown', function () {
+        if (
+          this.classList.contains('event-enabled') ||
+          this.classList.contains('h5p-image-pair-images-paired') ||
+          this.classList.contains('h5p-image-pair-item-selected')
+        ) {
+          return;
+        }
+
+        self.trigger('stopAudios');
+        self.playAudio();
+      });
+
       self.$card.hover(function() {
         $(this).addClass('h5p-image-pair-item-hover');
       }, function() {
@@ -300,6 +319,76 @@
     return (params !== undefined &&
       params.image !== undefined &&
       params.image.path !== undefined);
+  };
+
+  /**
+   * Create audio elements from audio object.
+   * @param {object} audio Audio object.
+   * @param {number} id Content id.
+   * @return {object[]} Audio elements.
+   */
+  ImagePair.Card.createAudio = function(audio, id) {
+    if (!audio || audio.length < 1 || !audio[0].path) {
+      return null;
+    }
+
+    const player = document.createElement('audio');
+    player.style.display = 'none';
+    player.src = H5P.getPath(audio[0].path, id);
+
+    return {
+      player: player,
+      promise: null
+    };
+  };
+
+  /**
+   * Start audio.
+   * @param {number} id Index.
+   */
+  ImagePair.Card.prototype.playAudio = function () {
+    if (!this.audio) {
+      return;
+    }
+
+    // People might click quickly ...
+    if (!this.audio.promise) {
+      this.audio.promise = this.audio.player.play();
+      this.audio.promise
+        .then(() => {
+          this.audio.promise = null;
+        })
+        .catch(() => {
+          // Browser policy prevents playing
+          this.audio.promise = null;
+        });
+    }
+  };
+
+  /**
+   * Stop audio
+   */
+  ImagePair.Card.prototype.stopAudio = function() {
+    /*
+     * People may click quickly, and audios that should
+     * be stopped may not have loaded yet.
+     */
+
+    if (!this.audio) {
+      return;
+    }
+
+    if (this.audio.promise) {
+      this.audio.promise.then(() => {
+        this.audio.player.pause();
+        this.audio.player.load(); // Reset
+        this.audio.promise = null;
+      });
+    }
+    else {
+      this.audio.player.pause();
+      this.audio.player.load(); // Reset
+    }
   };
 
   /**

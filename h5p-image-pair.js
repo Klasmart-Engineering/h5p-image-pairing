@@ -26,6 +26,13 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
      */
     var addCard = function(card, mate) {
 
+      // Stop all audios
+      card.on('stopAudios', function () {
+        cards.forEach(function (card) {
+          card.stopAudio();
+        })
+      });
+
       // while clicking on a card on cardList
       card.on('selected', function() {
 
@@ -265,6 +272,10 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
           clicked = undefined;
           self.reverseMateContainer();
         }
+
+        cards.forEach(function (card) {
+          card.stopAudio();
+        })
       });
 
       // while user decides to unpair the mate with its attached pair
@@ -502,15 +513,15 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
       if (ImagePair.Card.isValid(cardParams)) {
         // Create first card
         var cardTwo, cardOne = new ImagePair.Card(cardParams.image, id,
-          cardParams.imageAlt);
+          cardParams.imageAlt, cardParams.audio);
 
         if (ImagePair.Card.hasTwoImages(cardParams)) {
           // Use matching image for card two
-          cardTwo = new ImagePair.Card(cardParams.match, id, cardParams.matchAlt);
+          cardTwo = new ImagePair.Card(cardParams.match, id, cardParams.matchAlt, cardParams.matchAudio);
           cardOne.hasTwoImages = cardTwo.hasTwoImages = true;
         } else {
           // Add two cards with the same image
-          cardTwo = new ImagePair.Card(cardParams.image, id, cardParams.imageAlt);
+          cardTwo = new ImagePair.Card(cardParams.image, id, cardParams.imageAlt, cardParams.audio);
         }
 
         // Add cards to card list for shuffeling
@@ -532,8 +543,79 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
       self.triggerXAPI('attempted');
 
       self.$wrapper = $container.addClass('h5p-image-pair').html('');
-      $('<div class="h5p-image-pair-desc">' + parameters.taskDescription +
-        '</div>').appendTo($container).focus();
+      $descWrapper = $('<div class="h5p-image-pair-desc-wrapper">').appendTo($container);
+
+      // Add audio button functionality
+      const hasAudio = (parameters.taskDescriptionAudio && parameters.taskDescriptionAudio.length > 0);
+
+      if (hasAudio) {
+        const audio = ImagePair.Card.createAudio(parameters.taskDescriptionAudio, id);
+
+        const $audioButtonContainer = $('<div/>', {
+          'class': 'h5p-image-pair-desc-audio-wrapper'
+        });
+
+        const $audioButton = $('<button/>', {
+          'class': 'h5p-image-pair-audio-minimal-button h5p-image-pair-audio-minimal-play',
+          'aria-label': 'this.params.playAudio' // TODO
+        }).appendTo($audioButtonContainer)
+          .click( function () {
+            // Prevent ARIA from playing over audio on click
+            this.setAttribute('aria-hidden', 'true');
+
+            if (audio.player.paused) {
+              audio.player.play();
+            }
+            else {
+              audio.player.pause();
+            }
+          })
+          .on('focusout', function () {
+            // Restore ARIA, required when playing longer audio and tabbing out and back in
+            this.setAttribute('aria-hidden', 'false');
+          });
+
+        $audioButton.css({
+          'width': '100%',
+          'height': '100%'
+        });
+
+        //Event listeners that change the look of the player depending on events.
+        audio.player.addEventListener('ended', function () {
+          $audioButton
+            .attr('aria-hidden', false)
+            .attr('aria-label', 'self.params.playAudio')
+            .removeClass('h5p-image-pair-audio-minimal-pause')
+            .removeClass('h5p-image-pair-audio-minimal-play-paused')
+            .addClass('h5p-image-pair-audio-minimal-play');
+        });
+
+        audio.player.addEventListener('play', function () {
+          $audioButton
+            .attr('aria-label', 'self.params.pauseAudio')
+            .removeClass('h5p-image-pair-audio-minimal-play')
+            .removeClass('h5p-image-pair-audio-minimal-play-paused')
+            .addClass('h5p-image-pair-audio-minimal-pause');
+        });
+
+        audio.player.addEventListener('pause', function () {
+          $audioButton
+            .attr('aria-hidden', false)
+            .attr('aria-label', 'self.params.playAudio')
+            .removeClass('h5p-image-pair-audio-minimal-play')
+            .removeClass('h5p-image-pair-audio-minimal-pause')
+            .addClass('h5p-image-pair-audio-minimal-play-paused');
+        });
+
+        $audioButtonContainer.appendTo($descWrapper);
+      }
+
+      const $desc = $('<div class="h5p-image-pair-desc">' + parameters.taskDescription +
+        '</div>').appendTo($descWrapper).focus();
+      if (hasAudio) {
+        $desc.addClass('hasAudio');
+      }
+
       self.$gameContainer = $(
         '<div class="game-container event-enabled"/>');
       var $cardList = $('<ul class="card-container" />');
@@ -598,6 +680,10 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
         drop: function(event, ui) {
           var cardId = $(ui.draggable).data('card');
           var mateId = $(this).data('mate');
+
+          cards.forEach(function (card) {
+            card.stopAudio();
+          })
 
           //for ensuring drag end completes before drop is triggered
           setTimeout(
