@@ -344,7 +344,6 @@
 
   /**
    * Start audio.
-   * @param {number} id Index.
    */
   ImagePair.Card.prototype.playAudio = function () {
     if (!this.audio) {
