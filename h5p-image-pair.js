@@ -557,7 +557,7 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
 
         const $audioButton = $('<button/>', {
           'class': 'h5p-image-pair-audio-minimal-button h5p-image-pair-audio-minimal-play',
-          'aria-label': 'this.params.playAudio' // TODO
+          'aria-label': parameters.l10n.play
         }).appendTo($audioButtonContainer)
           .click( function () {
             // Prevent ARIA from playing over audio on click
@@ -584,7 +584,7 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
         audio.player.addEventListener('ended', function () {
           $audioButton
             .attr('aria-hidden', false)
-            .attr('aria-label', 'self.params.playAudio')
+            .attr('aria-label', parameters.l10n.play)
             .removeClass('h5p-image-pair-audio-minimal-pause')
             .removeClass('h5p-image-pair-audio-minimal-play-paused')
             .addClass('h5p-image-pair-audio-minimal-play');
@@ -592,7 +592,7 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
 
         audio.player.addEventListener('play', function () {
           $audioButton
-            .attr('aria-label', 'self.params.pauseAudio')
+            .attr('aria-label', parameters.l10n.pause)
             .removeClass('h5p-image-pair-audio-minimal-play')
             .removeClass('h5p-image-pair-audio-minimal-play-paused')
             .addClass('h5p-image-pair-audio-minimal-pause');
@@ -601,7 +601,7 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
         audio.player.addEventListener('pause', function () {
           $audioButton
             .attr('aria-hidden', false)
-            .attr('aria-label', 'self.params.playAudio')
+            .attr('aria-label', parameters.l10n.play)
             .removeClass('h5p-image-pair-audio-minimal-play')
             .removeClass('h5p-image-pair-audio-minimal-pause')
             .addClass('h5p-image-pair-audio-minimal-play-paused');

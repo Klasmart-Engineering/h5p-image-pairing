@@ -140,6 +140,20 @@
         "type": "text",
         "default": "You got @score of @total points",
         "description": "Feedback text, variables available: @score and @total. Example: 'You got @score of @total possible points'"
+      },
+      {
+        "label": "Play",
+        "importance": "low",
+        "name": "play",
+        "type": "text",
+        "default": "Play"
+      },
+      {
+        "label": "Pause",
+        "importance": "low",
+        "name": "pause",
+        "type": "text",
+        "default": "Pause"
       }
     ]
   }
