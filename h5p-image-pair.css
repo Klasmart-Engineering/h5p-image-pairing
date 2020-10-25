@@ -305,4 +305,6 @@
 
 .h5p-image-pair-desc-audio-wrapper .h5p-audio-minimal-button {
   font-size: 1em;
+  height: 100%;
+  width: 100%;
 }

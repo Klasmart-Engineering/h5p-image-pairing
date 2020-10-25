@@ -561,8 +561,6 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
           id
         );
         audioInstance.attach($audioButtonContainer);
-
-        const audio = ImagePair.Card.createAudio(parameters.taskDescriptionAudio, id);
         $audioButtonContainer.appendTo($descWrapper);
       }
 
