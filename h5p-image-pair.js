@@ -503,7 +503,6 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
       self.trigger('resize');
     };
 
-
     var cardsToUse = parameters.cards;
 
     // Initialize cards with the given parameters and trigger adding them
@@ -548,65 +547,22 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
       // Add audio button functionality
       const hasAudio = (parameters.taskDescriptionAudio && parameters.taskDescriptionAudio.length > 0);
 
+      // Audio Button
       if (hasAudio) {
-        const audio = ImagePair.Card.createAudio(parameters.taskDescriptionAudio, id);
-
         const $audioButtonContainer = $('<div/>', {
           'class': 'h5p-image-pair-desc-audio-wrapper'
         });
 
-        const $audioButton = $('<button/>', {
-          'class': 'h5p-image-pair-audio-minimal-button h5p-image-pair-audio-minimal-play',
-          'aria-label': parameters.l10n.play
-        }).appendTo($audioButtonContainer)
-          .click( function () {
-            // Prevent ARIA from playing over audio on click
-            this.setAttribute('aria-hidden', 'true');
+        const audioInstance = new H5P.Audio(
+          {
+            files: parameters.taskDescriptionAudio,
+            audioNotSupported: parameters.l10n.audioNotSupported
+          },
+          id
+        );
+        audioInstance.attach($audioButtonContainer);
 
-            if (audio.player.paused) {
-              audio.player.play();
-            }
-            else {
-              audio.player.pause();
-            }
-          })
-          .on('focusout', function () {
-            // Restore ARIA, required when playing longer audio and tabbing out and back in
-            this.setAttribute('aria-hidden', 'false');
-          });
-
-        $audioButton.css({
-          'width': '100%',
-          'height': '100%'
-        });
-
-        //Event listeners that change the look of the player depending on events.
-        audio.player.addEventListener('ended', function () {
-          $audioButton
-            .attr('aria-hidden', false)
-            .attr('aria-label', parameters.l10n.play)
-            .removeClass('h5p-image-pair-audio-minimal-pause')
-            .removeClass('h5p-image-pair-audio-minimal-play-paused')
-            .addClass('h5p-image-pair-audio-minimal-play');
-        });
-
-        audio.player.addEventListener('play', function () {
-          $audioButton
-            .attr('aria-label', parameters.l10n.pause)
-            .removeClass('h5p-image-pair-audio-minimal-play')
-            .removeClass('h5p-image-pair-audio-minimal-play-paused')
-            .addClass('h5p-image-pair-audio-minimal-pause');
-        });
-
-        audio.player.addEventListener('pause', function () {
-          $audioButton
-            .attr('aria-hidden', false)
-            .attr('aria-label', parameters.l10n.play)
-            .removeClass('h5p-image-pair-audio-minimal-play')
-            .removeClass('h5p-image-pair-audio-minimal-pause')
-            .addClass('h5p-image-pair-audio-minimal-play-paused');
-        });
-
+        const audio = ImagePair.Card.createAudio(parameters.taskDescriptionAudio, id);
         $audioButtonContainer.appendTo($descWrapper);
       }
 
