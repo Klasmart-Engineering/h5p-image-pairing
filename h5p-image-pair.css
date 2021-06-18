@@ -79,6 +79,12 @@
     -webkit-user-select: none;
     -ms-user-select: none;
 }
+.h5p-image-pair-item > audio.h5p-invisible-audio {
+  height: 0;
+  opacity: 0;
+  visibility: hidden;
+  width: 0;  
+}
 .h5p-image-pair-overlay {
     position: absolute;
     top: 0px;

@@ -211,7 +211,6 @@
      * @param {H5P.jQuery} $container
      */
     self.appendTo = function($container) {
-
       self.$card = $('<li class="h5p-image-pair-item">' +
         '<div class="image-container">' +
         '<img src="' + path + '" alt="' + alt + '" style="width:' +
@@ -223,6 +222,11 @@
       // Allow mate cards to play audio
       if (self.audio) {
         self.$card.addClass('hasAudio');
+
+        if (self.audio.player) {
+          self.audio.player.classList.add('h5p-invisible-audio');
+          self.$card.append(self.audio.player);
+        }
       }
 
       self.$card.on('keydown', function(event) {
