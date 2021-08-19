@@ -331,7 +331,7 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
      */
     var createButton = function(callback, icon, name) {
       return UI.createButton({
-        title: 'Submit',
+        'aria-label': name,
         click: function(event) {
           callback();
         },
