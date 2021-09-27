@@ -17,6 +17,9 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
       mates = [];
     var clicked;
 
+    // Used for KidsLoop workaround that scales H5P's iframe.
+    self.baseFontSize = 16;
+
     /**
      * pushing the cards and mates to appropriate arrays and
      * defining various events on which each card should respondTo
@@ -374,6 +377,46 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
     };
 
     /**
+     * Find H5P iframe.
+     * @return {HTMLElement|null} H5P iframe.
+     */
+    self.findIframe = function () {
+      try {
+        const iframeId = '#h5p-iframe-' + this.contentId;
+        const iframe = window.parent.document.querySelector(iframeId);
+        return iframe || null;
+      }
+      catch(error) {
+        console.warn('H5P.ImagePair may not scale properly, because it runs on a different domain than the iframe it lives in.');
+        return null;
+      }
+    };
+
+    /**
+     * Get inverted scale of element.
+     * @param {HTMLElement} element Element.
+     * @return {number} Inverted scale.
+     */
+    self.getInvertedScale = function (element) {
+      const style = window.getComputedStyle(element);
+      const matrix = style.getPropertyValue('transform');
+
+      let matrixValues;
+
+      if (matrix && matrix.indexOf('matrix(') !== -1) {
+        matrixValues = matrix.split('(')[1].split(')')[0].split(',');
+        matrixValues = matrixValues.map(function (value) {
+          return parseFloat(value);
+        })
+      }
+      else {
+        matrixValues = [1, 0, 0, 1, 0, 0];
+      }
+
+      return 1 / matrixValues[0];
+    };
+
+    /**
      * function that defines the changes that needs to be applied on the right side
      * after a selected element is successfully dropped
      * @public
@@ -539,6 +582,9 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
      */
     self.attach = function($container) {
 
+      // Get regular base font size for KidsLoop scaling workaround
+      self.baseFontSize = parseFloat($container.parent().css('font-size')) || self.baseFontSize;
+
       self.triggerXAPI('attempted');
 
       self.$wrapper = $container.addClass('h5p-image-pair').html('');
@@ -663,8 +709,27 @@ H5P.ImagePair = (function(EventDispatcher, $, UI) {
         self.$footer.appendTo($container);
       }
     };
-  }
 
+    /*
+     * Resize handler. Required for KidsLoop's H5P integration that may
+     * scale H5P's iframe that will lead to improper visual design.
+     */
+    self.on('resize', function () {
+      const iframe = this.findIframe();
+      if (!iframe) {
+        return;
+      }
+
+      const inverseScale = self.getInvertedScale(iframe);
+      if (typeof inverseScale !== 'number') {
+        return;
+      }
+
+      self.$wrapper
+        .parent()
+        .css('font-size', self.baseFontSize * inverseScale + 'px');
+    });
+  }
 
   // Extends the event dispatcher
   ImagePair.prototype = Object.create(EventDispatcher.prototype);
