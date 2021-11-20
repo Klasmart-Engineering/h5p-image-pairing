@@ -1,4 +1,4 @@
-(function(ImagePair, EventDispatcher, $) {
+(function (ImagePair, EventDispatcher, $) {
 
   /**
    * Controls all the operations for each card.
@@ -11,7 +11,7 @@
    * @param {object} [audio] Audio object.
    */
 
-  ImagePair.Card = function(image, id, alt, audio) {
+  ImagePair.Card = function (image, id, alt, audio) {
     // @alias H5P.ImagePair.Card#
     var self = this;
 
@@ -30,11 +30,13 @@
       if (image.width > image.height) {
         width = '100%';
         height = 'auto';
-      } else {
+      }
+      else {
         height = '100%';
         width = 'auto';
       }
-    } else {
+    }
+    else {
       width = height = '100%';
     }
 
@@ -44,7 +46,7 @@
      * get the image element of the current card
      * @public
      */
-    self.getImage = function() {
+    self.getImage = function () {
       return self.$card.find('img').clone();
     };
 
@@ -52,7 +54,7 @@
      * set a card to correct state
      * @public
      */
-    self.setCorrect = function() {
+    self.setCorrect = function () {
       self.$pairingMark.addClass('correct-mark');
       self.$front.addClass('pair-item-correct');
       self.$rear.addClass('pair-item-correct');
@@ -62,7 +64,7 @@
      * set a card to incorrect state
      * @public
      */
-    self.setIncorrect = function() {
+    self.setIncorrect = function () {
       self.$pairingMark.addClass('incorrect-mark');
       self.$front.addClass('pair-item-incorrect');
       self.$rear.addClass('pair-item-incorrect');
@@ -72,7 +74,7 @@
      * set  card to solved state
      * @public
      */
-    self.setSolved = function() {
+    self.setSolved = function () {
       self.$pairingMark.addClass('solved-mark');
       self.$front.addClass('pair-item-solved');
       self.$rear.addClass('pair-item-solved');
@@ -82,7 +84,7 @@
      * set  card to selected state
      * @public
      */
-    self.setSelected = function() {
+    self.setSelected = function () {
       //for keyboard navigation
       self.isSelected = true;
       self.$card.addClass('h5p-image-pair-item-selected');
@@ -92,29 +94,26 @@
      *remove  card from selected state
      * @public
      */
-    self.removeSelected = function() {
+    self.removeSelected = function () {
       //for keyboard navigation
       self.isSelected = false;
       self.$card.removeClass('h5p-image-pair-item-selected');
     };
 
-
-
     /**
      * makTabbable - Make the card accessible when tabbing
      */
 
-    self.makeTabbable = function() {
+    self.makeTabbable = function () {
       if (self.$card) {
         self.$card.attr('tabindex', '0');
       }
     };
 
-
     /**
      *  Prevent tabbing to the card
      */
-    self.makeUntabbable = function() {
+    self.makeUntabbable = function () {
       if (self.$card) {
         self.$card.attr('tabindex', '-1');
       }
@@ -123,16 +122,16 @@
     /**
      *  Make card tabbable and move focus to it
      */
-    self.setFocus = function() {
+    self.setFocus = function () {
       self.makeTabbable();
       self.$card.focus();
-    }
+    };
 
     /**
      * triggerd on mate when it is paired. make its droppable propery disabled
      * @public
      */
-    self.transform = function() {
+    self.transform = function () {
       // remove droppable property
       self.$card.removeClass('h5p-image-pair-item-hover').removeClass(
         'droppable').droppable("option", "disabled", true);
@@ -143,7 +142,7 @@
      * @public
      */
 
-    self.disable = function() {
+    self.disable = function () {
 
       //for keyboard navigation
       self.isPaired = true;
@@ -156,7 +155,7 @@
      * @public
      * @param {H5P.ImagePair.Card} pair
      */
-    self.pair = function(pair) {
+    self.pair = function (pair) {
 
       self.srcImage = (self.srcImage) ? self.srcImage : self.getImage();
       self.$top = self.$card;
@@ -172,15 +171,15 @@
       self.$card.replaceWith(self.$top);
 
       //while clicking on either of the paired cards, trigger detach
-      self.$top.children('.card-paired').on('click', function() {
+      self.$top.children('.card-paired').on('click', function () {
         pair.$card.removeClass('h5p-image-pair-item-disabled');
         self.detach();
       });
 
-      self.$top.children('.card-paired').hover(function() {
+      self.$top.children('.card-paired').hover(function () {
         $(this).addClass('h5p-image-pair-item-hover');
         $(this).siblings('div').addClass('h5p-image-pair-item-hover');
-      }, function() {
+      }, function () {
         $(this).removeClass('h5p-image-pair-item-hover');
         $(this).siblings('div').removeClass(
           'h5p-image-pair-item-hover');
@@ -194,7 +193,7 @@
      * triggerd user clicks on either of the card that is currently paired
      * @public
      */
-    self.detach = function() {
+    self.detach = function () {
       self.isPaired = false;
       self.$card.removeClass('h5p-image-pair-images-paired').empty();
       $('<div class="image-container"></div>').append(self.srcImage).appendTo(
@@ -210,7 +209,7 @@
      *
      * @param {H5P.jQuery} $container
      */
-    self.appendTo = function($container) {
+    self.appendTo = function ($container) {
       self.$card = $('<li class="h5p-image-pair-item">' +
         '<div class="image-container">' +
         '<img src="' + path + '" alt="' + alt + '" style="width:' +
@@ -229,7 +228,7 @@
         }
       }
 
-      self.$card.on('keydown', function(event) {
+      self.$card.on('keydown', function (event) {
 
         switch (event.which) {
           case 13: //enter
@@ -246,7 +245,8 @@
             if (self.isPaired) {
               // move to next pair
               self.trigger('nextPair');
-            } else {
+            }
+            else {
               // move to the next card/mate
               self.trigger('next');
             }
@@ -256,7 +256,8 @@
             if (self.isPaired) {
               //move to the previous pair
               self.trigger('prevPair');
-            } else {
+            }
+            else {
               // move to the previous card/mate
               self.trigger('prev');
             }
@@ -265,7 +266,8 @@
             if (self.isPaired) {
               // move to the last pair
               self.trigger('lastPair');
-            } else {
+            }
+            else {
               // move to the last card/mate
               self.trigger('last');
             }
@@ -274,7 +276,8 @@
             if (self.isPaired) {
               // move to the first pair
               self.trigger('firstPair');
-            } else {
+            }
+            else {
               // move to the first card/mate
               self.trigger('first');
             }
@@ -282,7 +285,7 @@
         }
       });
 
-      self.$card.click(function() {
+      self.$card.click(function () {
         self.trigger('selected');
       }).end();
 
@@ -299,9 +302,9 @@
         self.playAudio();
       });
 
-      self.$card.hover(function() {
+      self.$card.hover(function () {
         $(this).addClass('h5p-image-pair-item-hover');
-      }, function() {
+      }, function () {
         $(this).removeClass('h5p-image-pair-item-hover');
       });
     };
@@ -319,7 +322,7 @@
    * @param {object} params
    * @returns {boolean}
    */
-  ImagePair.Card.isValid = function(params) {
+  ImagePair.Card.isValid = function (params) {
     return (params !== undefined &&
       params.image !== undefined &&
       params.image.path !== undefined);
@@ -331,7 +334,7 @@
    * @param {number} id Content id.
    * @return {object[]} Audio elements.
    */
-  ImagePair.Card.createAudio = function(audio, id) {
+  ImagePair.Card.createAudio = function (audio, id) {
     if (!audio || audio.length < 1 || !audio[0].path) {
       return null;
     }
@@ -371,7 +374,7 @@
   /**
    * Stop audio
    */
-  ImagePair.Card.prototype.stopAudio = function() {
+  ImagePair.Card.prototype.stopAudio = function () {
     /*
      * People may click quickly, and audios that should
      * be stopped may not have loaded yet.
@@ -402,7 +405,7 @@
    * @returns {boolean}
    */
 
-  ImagePair.Card.hasTwoImages = function(params) {
+  ImagePair.Card.hasTwoImages = function (params) {
     return (params !== undefined &&
       params.match !== undefined &&
       params.match.path !== undefined);
