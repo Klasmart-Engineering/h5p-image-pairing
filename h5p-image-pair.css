@@ -34,6 +34,10 @@
 
 }
 .h5p-image-pair .game-container > ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
     width: 50%;
     /*width: auto;*/
     float: left;
@@ -42,6 +46,13 @@
     padding: 1em;
     box-sizing: border-box;
     border-bottom: 1px solid #dde4ea;
+}
+.h5p-image-pair .game-container > ul > li.line-break {
+  flex-basis: 100%;
+  height: 0;
+}
+.h5p-image-pair .game-container > ul > li.line-break.hidden {
+  display: none;
 }
 .h5p-image-pair-item {
     width: 6.625em;
@@ -53,10 +64,14 @@
     cursor: pointer;
     border: 2px solid #dbe2e8;
     box-shadow: 2px 2px 0px 2px rgba(203,213,222,0.2);
+    flex-shrink: 0;
 }
 .h5p-image-pair-item .image-container {
-    width: 6.625em;
-    height: 6.625em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     -webkit-box-shadow: inset 0px 2px 74px 0px rgba(203, 213, 222, 1);
     -moz-box-shadow: inset 0px 2px 74px 0px rgba(203, 213, 222, 1);
     box-shadow: inset 0px 2px 74px 0px rgba(203, 213, 222, 1);
@@ -67,10 +82,6 @@
     max-height: 100%;
     max-width: 100%;
     position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    bottom: 0;
     margin: auto;
     user-drag: none;
     user-select: none;
@@ -83,7 +94,7 @@
   height: 0;
   opacity: 0;
   visibility: hidden;
-  width: 0;  
+  width: 0;
 }
 .h5p-image-pair-overlay {
     position: absolute;
@@ -182,8 +193,6 @@
     box-shadow: none;
 }
 .h5p-image-pair-images-paired .front {
-    left: 0.5em !important;
-    top: 0.5em !important;
     z-index: 1;
 }
 .h5p-image-pair-images-paired.h5p-image-pair-item-hover {
@@ -233,6 +242,10 @@
     background-size: cover;
     position: relative;
     border-radius: 6px 6px 6px 6px;
+}
+.h5p-image-pair-images-paired .card-paired.front {
+  top: 0.5em;
+  left: 0.5em;
 }
 .h5p-image-pair-images-paired .card-paired img {
     width: 100%;

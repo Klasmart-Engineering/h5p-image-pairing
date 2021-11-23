@@ -187,6 +187,39 @@
 
       self.isPaired = true;
 
+      self.resize();
+    };
+
+    /**
+     * Resize card incl. variants.
+     * @param {number} cardSize Card size in px.
+     */
+    self.resize = function (cardSize) {
+      if (typeof cardSize !== 'number' || cardSize < 0) {
+        return;
+      }
+
+      // Set card size
+      self.$card.css({ width: cardSize + 'px', height: cardSize + 'px' });
+
+      if (self.$front) {
+        const pairSize = Math.floor(cardSize / 2); // half size of original
+        self.$front.css({
+          width: pairSize + 'px',
+          height: pairSize + 'px',
+          top: cardSize / 13 + 'px', // 13 is factor used by original implementation
+          left: cardSize / 13 + 'px' // 13 is factor used by original implementation
+        });
+      }
+      if (self.$rear) {
+        const pairSize = Math.floor(cardSize / 2); // half size of original
+        self.$rear.css({
+          width: pairSize + 'px',
+          height: pairSize + 'px',
+          top: cardSize / 2.4 + 'px', // 2.4 is factor used by original implementation
+          left: -cardSize / 13 + 'px' // 13 is factor used by original implementation
+        });
+      }
     };
 
     /**

@@ -8,6 +8,11 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
    * @param {Number} id
    */
   function ImagePair(parameters, id) {
+    parameters.behaviour = parameters.behaviour || {};
+
+    // Influence visual behavior
+    this.maxColumns = parameters.behaviour.maxColumns || false;
+    this.enforceColumns = parameters.behaviour.enforceColumns || true;
 
     // @alias H5P.ImagePair
     var self = this;
@@ -488,7 +493,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       self.$progressBar.appendTo(self.$feedbacks);
       self.$feedbacks.appendTo(self.$footer);
 
-      if (parameters.behaviour) {
+      if (parameters.behaviour.allowRetry) {
         //set the value if retry is enabled
         self.$retryButton = createButton(self.retry, 'fa-repeat',
           parameters.l10n.tryAgain);
@@ -582,27 +587,34 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
 
       self.$gameContainer = $(
         '<div class="game-container event-enabled"/>');
-      var $cardList = $('<ul class="card-container" />');
-      var $mateList = $('<ul class="mate-container"/>');
+      self.$cardList = $('<ul class="card-container" />');
+      self.$mateList = $('<ul class="mate-container"/>');
       self.$footer = $('<div class="footer-container"/>');
 
       self.$checkButton = createButton(self.displayResult, 'fa-check',
         parameters.l10n.checkAnswer);
       self.$checkButton.appendTo(self.$footer);
 
+      self.cardBreakers = [];
+      self.mateBreakers = [];
 
       for (var i = 0; i < cards.length; i++) {
-
-        cards[i].appendTo($cardList);
-        mates[i].appendTo($mateList);
+        cards[i].appendTo(self.$cardList);
+        mates[i].appendTo(self.$mateList);
         cards[i].$card.attr("data-card", i);
         cards[i].$card.addClass("draggable");
         mates[i].$card.addClass('droppable');
         mates[i].$card.attr("data-mate", i);
 
+        const $lineBreakerCard = $('<li class="line-break hidden"></li>');
+        self.$cardList.append($lineBreakerCard);
+        self.cardBreakers.push($lineBreakerCard);
+        const $lineBreakerMate = $('<li class="line-break hidden"></li>');
+        self.$mateList.append($lineBreakerMate);
+        self.mateBreakers.push($lineBreakerMate);
       }
 
-      $cardList.find('.draggable').draggable(
+      self.$cardList.find('.draggable').draggable(
 
         {
           opacity: 0.7,
@@ -616,7 +628,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
               'h5p-image-pair-item-hover').removeClass(
               'h5p-image-pair-item-selected').addClass(
               'h5p-image-pair-item-disabled');
-            $cardList.find('.ui-draggable-dragging').removeClass(
+            self.$cardList.find('.ui-draggable-dragging').removeClass(
               'h5p-image-pair-item-hover');
             self.prepareMateContainer();
           },
@@ -628,7 +640,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
           }
         });
 
-      $mateList.find('.droppable').droppable({
+      self.$mateList.find('.droppable').droppable({
         tolerance: 'intersect',
         over: function () {
           var mateId = $(this).data('mate');
@@ -665,15 +677,54 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
         }
       });
 
-      if ($cardList.children().length >= 0) {
-        $cardList.appendTo(self.$gameContainer);
-        $mateList.appendTo(self.$gameContainer);
+      if (self.$cardList.children().length >= 0) {
+        self.$cardList.appendTo(self.$gameContainer);
+        self.$mateList.appendTo(self.$gameContainer);
         mates[0].makeTabbable();
         cards[0].setFocus();
         self.$gameContainer.appendTo($container);
         self.$footer.appendTo($container);
       }
     };
+
+    // Handle resize
+    this.on('resize', function () {
+      if (!this.maxColumns || !cards.length) {
+        return; // Leave sizing/wrapping to CSS flex
+      }
+
+      // Compute number of cards that fit into container
+      this.fittingColumns = Math.floor(
+        this.$cardList.width() / cards[0].$card.outerWidth(true)
+      );
+
+      if (!this.cardInitialWidth) {
+        this.cardInitialWidth = cards[0].$card.width();
+      }
+
+      // Resize cards if required
+      if (this.enforceColumns) {
+        const cardPassepartout = cards[0].$card.outerWidth(true) - cards[0].$card.width();
+        const cardSize = Math.min(
+          this.cardInitialWidth,
+          Math.floor((self.$cardList.width() - this.maxColumns * cardPassepartout) / this.maxColumns) - 2
+        );
+        this.fittingColumns = this.maxColumns;
+
+        for (let i = 0; i < cards.length; i++) {
+          cards[i].resize(cardSize);
+          mates[i].resize(cardSize);
+        }
+      }
+
+      // De-/activate line breakers in flex box
+      const breakColumn = Math.min(this.fittingColumns, this.maxColumns);
+      for (let i = 0; i < cards.length; i++) {
+        const wrap = i % breakColumn === breakColumn - 1;
+        this.cardBreakers[i].toggleClass('hidden', !wrap);
+        this.mateBreakers[i].toggleClass('hidden', !wrap);
+      }
+    });
   }
 
 

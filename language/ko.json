@@ -52,6 +52,14 @@
       "fields": [
         {
           "label": "게임 종료 시 재시도 버튼 추가"
+        },
+        {
+          "label": "Maximum number of columns",
+          "description": "Set the maximum number of columns to be shown. The number of columns can still become smaller than the value set."
+        },
+        {
+          "label": "Enforce number of columns",
+          "description": "The content type will reduce the number of columns if the available space becomes too small. Activate this setting if you want to enforce the maximum number of columns even on a narrow screen knowing that cards may become too small to be used."
         }
       ]
     },
