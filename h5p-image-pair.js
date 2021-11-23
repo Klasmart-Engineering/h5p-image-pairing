@@ -12,7 +12,9 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
 
     // Influence visual behavior
     this.maxColumns = parameters.behaviour.maxColumns || false;
-    this.enforceColumns = parameters.behaviour.enforceColumns || true;
+    this.enforceColumns = typeof parameters.behaviour.enforceColumns === 'boolean' ?
+      parameters.behaviour.enforceColumns :
+      true;
 
     // @alias H5P.ImagePair
     var self = this;
