@@ -633,12 +633,21 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
             self.$cardList.find('.ui-draggable-dragging').removeClass(
               'h5p-image-pair-item-hover');
             self.prepareMateContainer();
+
+            // Work around potential issue in jQuery
+            clearTimeout(cards[cardId].cardBlockTimeout);
+            cards[cardId].blocked = true;
           },
           stop: function () {
             var cardId = $(this).data('card');
             cards[cardId].$card.removeClass(
               'h5p-image-pair-item-disabled');
             self.reverseMateContainer();
+
+            // Work around potential issue in jQuery
+            cards[cardId].cardBlockTimeout = setTimeout(function () {
+              cards[cardId].blocked = false;
+            }, 100);
           }
         });
 
