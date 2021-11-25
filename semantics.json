@@ -113,7 +113,7 @@
         "name": "maxColumns",
         "type": "number",
         "label": "Maximum number of columns",
-        "description": "Set the maximum number of columns to be shown. The number of columns can still become smaller than the value set.",
+        "description": "Set the maximum number of columns to be shown. The number of columns can still become smaller than the value set unless you enforce the number of columns.",
         "importance": "low",
         "min": 1,
         "optional": true
