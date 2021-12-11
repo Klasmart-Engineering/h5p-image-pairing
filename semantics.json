@@ -101,6 +101,7 @@
     "importance": "low",
     "description": "These options will let you control how the game behaves.",
     "optional": true,
+    "widget": "imagepairbehaviour",
     "fields": [
       {
         "name": "allowRetry",
