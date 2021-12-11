@@ -23,7 +23,7 @@ H5PUpgrades['H5P.ImagePair'] = (function () {
 
         parameters.behaviour = {
           allowRetry: allowRetry,
-          enforceColumns: true
+          enforceColumns: false
         };
 
         finished(null, parameters, extras);
