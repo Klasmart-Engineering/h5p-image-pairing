@@ -196,6 +196,7 @@
      */
     self.resize = function (cardSize) {
       if (typeof cardSize !== 'number' || cardSize < 0) {
+        self.trigger('resize');
         return;
       }
 

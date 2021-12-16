@@ -541,6 +541,14 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
           cardTwo = new ImagePair.Card(cardParams.image, id, cardParams.imageAlt, cardParams.audio);
         }
 
+        cardOne.on('resize', function () {
+          self.trigger('resize');
+        });
+
+        cardTwo.on('resize', function () {
+          self.trigger('resize');
+        });
+
         // Add cards to card list for shuffeling
         addCard(cardOne, cardTwo);
       }
