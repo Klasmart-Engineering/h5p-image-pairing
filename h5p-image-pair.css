@@ -226,10 +226,10 @@
     line-height: 1.7em;
 }
 .h5p-image-pair-images-paired .card-paired {
+    bottom: .75em;
+    right: .75em;
     display: inline-block;
     line-height: 5.83em;
-    top: 2.813em;
-    left: -0.5em;
     border: 2px solid #ffffff;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -238,12 +238,12 @@
     height: 3.313em;
     overflow: hidden;
     background-size: cover;
-    position: relative;
+    position: absolute;
     border-radius: 6px 6px 6px 6px;
 }
 .h5p-image-pair-images-paired .card-paired.front {
-  top: 0.5em;
-  left: 0.5em;
+  left: .75em;
+  top: .75em;
 }
 .h5p-image-pair-images-paired .card-paired img {
     width: 100%;
