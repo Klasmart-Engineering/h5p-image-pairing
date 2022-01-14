@@ -94,6 +94,10 @@
         {
           "label": "Audio not supported message",
           "default": "Your browser does not support this audio"
+        },
+        {
+          "label": "No images provided",
+          "default": "Someone forgot to provide images."
         }
       ]
     }

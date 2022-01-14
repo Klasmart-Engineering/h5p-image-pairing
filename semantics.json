@@ -194,8 +194,7 @@
         "label": "No images provided",
         "importance": "low",
         "common": true,
-        "default": "Someone forgot to provide images.",
-        "state": "new"
+        "default": "Someone forgot to provide images."
       }
     ]
   }
