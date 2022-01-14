@@ -187,6 +187,15 @@
         "importance": "low",
         "common": true,
         "default": "Your browser does not support this audio"
+      },
+      {
+        "name": "noImagesProvided",
+        "type": "text",
+        "label": "No images provided",
+        "importance": "low",
+        "common": true,
+        "default": "Someone forgot to provide images.",
+        "state": "new"
       }
     ]
   }
