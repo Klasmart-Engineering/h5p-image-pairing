@@ -14,7 +14,9 @@
     "description": "Add an audio version for the task description.",
     "importance": "medium",
     "optional": true,
-    "widgetExtensions": ["AudioRecorder"]
+    "widgetExtensions": [
+      "AudioRecorder"
+    ]
   },
   {
     "name": "cards",
@@ -57,7 +59,9 @@
           "description": "Will be played when starting to drag.",
           "importance": "medium",
           "optional": true,
-          "widgetExtensions": ["AudioRecorder"]
+          "widgetExtensions": [
+            "AudioRecorder"
+          ]
         },
         {
           "name": "match",
@@ -83,7 +87,9 @@
           "description": "Will be played when clicked.",
           "importance": "medium",
           "optional": true,
-          "widgetExtensions": ["AudioRecorder"]
+          "widgetExtensions": [
+            "AudioRecorder"
+          ]
         }
       ]
     }
@@ -95,6 +101,7 @@
     "importance": "low",
     "description": "These options will let you control how the game behaves.",
     "optional": true,
+    "widget": "imagepairbehaviour",
     "fields": [
       {
         "name": "allowRetry",
@@ -102,6 +109,24 @@
         "label": "Add button for retrying when the game is over",
         "importance": "low",
         "default": true
+      },
+      {
+        "name": "maxColumns",
+        "type": "number",
+        "label": "Maximum number of columns",
+        "description": "Set the maximum number of columns to be shown. The number of columns can still become smaller than the value set unless you enforce the number of columns.",
+        "importance": "low",
+        "min": 1,
+        "optional": true
+      },
+      {
+        "name": "enforceColumns",
+        "type": "boolean",
+        "label": "Enforce number of columns",
+        "description": "The content type will reduce the number of columns if the available space becomes too small. Activate this setting if you want to enforce the maximum number of columns even on a narrow screen knowing that cards may become too small to be used.",
+        "importance": "low",
+        "default": false,
+        "optional": true
       }
     ]
   },

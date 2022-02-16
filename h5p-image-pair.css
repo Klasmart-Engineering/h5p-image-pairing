@@ -24,8 +24,8 @@
 /*game-container*/
 
 .h5p-image-pair .game-container {
-    display: inline-block;
-    table-layout: auto;
+    display: flex;
+    flex-direction: row;
     /*max-width: 100%;*/
     width: 100%;
     padding: 0;
@@ -33,15 +33,24 @@
     margin-right: auto;
 
 }
-.h5p-image-pair .game-container > ul {
-    width: 50%;
+
+.h5p-image-pair .game-container > div {
+  padding: 1em;
+  float: left;
+  width: 50%;
+  box-sizing: border-box;
+  border-bottom: 1px solid #dde4ea;
+}
+.h5p-image-pair .game-container > div > ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    width: 100%;
     /*width: auto;*/
-    float: left;
     margin: 0;
     list-style: none;
-    padding: 1em;
-    box-sizing: border-box;
-    border-bottom: 1px solid #dde4ea;
+    padding: 0;
 }
 .h5p-image-pair-item {
     width: 6.625em;
@@ -53,10 +62,14 @@
     cursor: pointer;
     border: 2px solid #dbe2e8;
     box-shadow: 2px 2px 0px 2px rgba(203,213,222,0.2);
+    flex-shrink: 0;
 }
 .h5p-image-pair-item .image-container {
-    width: 6.625em;
-    height: 6.625em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     -webkit-box-shadow: inset 0px 2px 74px 0px rgba(203, 213, 222, 1);
     -moz-box-shadow: inset 0px 2px 74px 0px rgba(203, 213, 222, 1);
     box-shadow: inset 0px 2px 74px 0px rgba(203, 213, 222, 1);
@@ -67,10 +80,6 @@
     max-height: 100%;
     max-width: 100%;
     position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    bottom: 0;
     margin: auto;
     user-drag: none;
     user-select: none;
@@ -83,7 +92,7 @@
   height: 0;
   opacity: 0;
   visibility: hidden;
-  width: 0;  
+  width: 0;
 }
 .h5p-image-pair-overlay {
     position: absolute;
@@ -161,7 +170,7 @@
 /*end-of-card-container*/
 /*mate-container*/
 
-.h5p-image-pair .mate-container {
+.h5p-image-pair .mate-container-wrapper {
     background-color: #eef1f4;
     box-shadow: 2px 0 0 #cbd4db inset;
 }
@@ -182,8 +191,6 @@
     box-shadow: none;
 }
 .h5p-image-pair-images-paired .front {
-    left: 0.5em !important;
-    top: 0.5em !important;
     z-index: 1;
 }
 .h5p-image-pair-images-paired.h5p-image-pair-item-hover {
@@ -219,10 +226,10 @@
     line-height: 1.7em;
 }
 .h5p-image-pair-images-paired .card-paired {
+    bottom: .75em;
+    right: .75em;
     display: inline-block;
     line-height: 5.83em;
-    top: 2.813em;
-    left: -0.5em;
     border: 2px solid #ffffff;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -231,8 +238,12 @@
     height: 3.313em;
     overflow: hidden;
     background-size: cover;
-    position: relative;
+    position: absolute;
     border-radius: 6px 6px 6px 6px;
+}
+.h5p-image-pair-images-paired .card-paired.front {
+  left: .75em;
+  top: .75em;
 }
 .h5p-image-pair-images-paired .card-paired img {
     width: 100%;

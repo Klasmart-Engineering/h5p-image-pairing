@@ -2,8 +2,8 @@
 	"title": "Image Pair",
 	"description": "Pair appropriate images",
 	"majorVersion": 1,
-	"minorVersion": 4,
-	"patchVersion": 0,
+	"minorVersion": 5,
+	"patchVersion": 1,
 	"runnable": 1,
 	"author": "JithinSpace",
 	"license": "MIT",
@@ -47,6 +47,11 @@
 		}
 	],
 	"editorDependencies": [
+		{
+			"machineName": "H5PEditor.ImagePairBehaviour",
+			"majorVersion": 1,
+			"minorVersion": 0
+		},
 		{
 			"machineName": "H5PEditor.VerticalTabs",
 			"majorVersion": 1,
