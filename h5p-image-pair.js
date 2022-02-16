@@ -8,7 +8,23 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
    * @param {Number} id
    */
   function ImagePair(parameters, id) {
-    parameters.behaviour = parameters.behaviour || {};
+    parameters = ImagePair.extend({
+      cards: [],
+      behaviour: {
+        allowRetry: true,
+        enforceColumns: false
+      },
+      l10n: {
+        checkAnswer: 'Check',
+        tryAgain: 'Retry',
+        showSolution: 'Show solution',
+        score: 'You got @score of @total points',
+        play: 'Play',
+        pause: 'Pause',
+        audioNotSupported: 'Your browser does not support this audio',
+        noImagesProvided: 'Someone forgot to add images.'
+      }
+    }, parameters);
 
     // Influence visual behavior
     this.maxColumns = parameters.behaviour.maxColumns || false;
@@ -565,7 +581,13 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      */
     self.attach = function ($container) {
 
-      self.triggerXAPI('attempted');
+      if (!cards.length) {
+        $container
+          .append($('<div class="h5p-image-pair h5p-no-images-provided">')
+            .html(parameters.l10n.noImagesProvided));
+        return;
+      }
+
 
       self.$wrapper = $container.addClass('h5p-image-pair').html('');
       const $descWrapper = $('<div class="h5p-image-pair-desc-wrapper">').appendTo($container);
@@ -757,6 +779,27 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
     });
   }
 
+
+  /**
+   * Extend an array just like JQuery's extend.
+   * @param {object} arguments Objects to be merged.
+   * @return {object} Merged objects.
+   */
+  ImagePair.extend = function () {
+    for (let i = 1; i < arguments.length; i++) {
+      for (let key in arguments[i]) {
+        if (Object.prototype.hasOwnProperty.call(arguments[i], key)) {
+          if (typeof arguments[0][key] === 'object' && typeof arguments[i][key] === 'object') {
+            this.extend(arguments[0][key], arguments[i][key]);
+          }
+          else {
+            arguments[0][key] = arguments[i][key];
+          }
+        }
+      }
+    }
+    return arguments[0];
+  };
 
   // Extends the event dispatcher
   ImagePair.prototype = Object.create(EventDispatcher.prototype);

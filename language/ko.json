@@ -94,6 +94,10 @@
         {
           "label": "오디오가 지원되지 않음 메시지",
           "default": "귀하의 브라우저는 이 오디오를 지원하지 않습니다"
+        },
+        {
+          "label": "No images provided",
+          "default": "Someone forgot to provide images."
         }
       ]
     }
