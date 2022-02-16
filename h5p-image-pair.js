@@ -531,6 +531,16 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
         result === cards.length);
       self.trigger(completedEvent);
 
+      // Emit screenshot
+      setTimeout(function() {
+        if (H5P && H5P.KLScreenshot) {
+          H5P.KLScreenshot.takeScreenshot(
+            self,
+            self.$wrapper.get(0)
+          );
+        }
+      }, 1000); // Allow results to display
+
       // set focus on the first button in the footer
       self.$footer.children('button').first().focus();
       self.trigger('resize');
