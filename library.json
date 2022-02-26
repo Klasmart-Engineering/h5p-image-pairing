@@ -2,8 +2,8 @@
 	"title": "Image Pair",
 	"description": "Pair appropriate images",
 	"majorVersion": 1,
-	"minorVersion": 5,
-	"patchVersion": 2,
+	"minorVersion": 6,
+	"patchVersion": 0,
 	"runnable": 1,
 	"author": "JithinSpace",
 	"license": "MIT",
@@ -30,10 +30,15 @@
 			"majorVersion": 4,
 			"minorVersion": 5
 		},
+    {
+      "machineName": "FontKidsLoop",
+      "majorVersion": 1,
+      "minorVersion": 0
+    },
 		{
 			"machineName": "H5P.JoubelUI",
 			"majorVersion": 1,
-			"minorVersion": 3
+			"minorVersion": 4
 		},
 		{
 			"machineName": "jQuery.ui",
@@ -43,7 +48,7 @@
 		{
 			"machineName": "H5P.Audio",
 			"majorVersion": 1,
-			"minorVersion": 4
+			"minorVersion": 5
 		}
 	],
 	"editorDependencies": [
