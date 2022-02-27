@@ -65,6 +65,11 @@
 		{
 			"machineName": "H5PEditor.AudioRecorder",
 			"majorVersion": 1,
+			"minorVersion": 1
+		},
+		{
+			"machineName": "EditorFontKidsLoop",
+			"majorVersion": 1,
 			"minorVersion": 0
 		}
 	]
