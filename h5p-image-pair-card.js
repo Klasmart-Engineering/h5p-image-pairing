@@ -5,20 +5,23 @@
    *
    * @class H5P.ImagePair.Card
    * @extends H5P.EventDispatcher
+   * @param {number} id Id.
    * @param {Object} image
-   * @param {number} id
+   * @param {number} contentId
    * @param {string} alt
    * @param {object} [audio] Audio object.
    */
 
-  ImagePair.Card = function (image, id, alt, audio) {
+  ImagePair.Card = function (id, image, contentId, alt, audio) {
     // @alias H5P.ImagePair.Card#
     var self = this;
+
+    self.id = id;
 
     // Initialize event inheritance
     EventDispatcher.call(self);
 
-    var path = H5P.getPath(image.path, id);
+    var path = H5P.getPath(image.path, contentId);
 
     alt = alt || 'Missing description';
 
@@ -40,7 +43,7 @@
       width = height = '100%';
     }
 
-    self.audio = ImagePair.Card.createAudio(audio, id);
+    self.audio = ImagePair.Card.createAudio(audio, contentId);
 
     /**
      * get the image element of the current card
@@ -154,8 +157,14 @@
      * triggered on mate when pairing happens
      * @public
      * @param {H5P.ImagePair.Card} pair
+     * @param {object} params Parameters.
      */
-    self.pair = function (pair) {
+    self.pair = function (pair, params) {
+      params = params || {};
+
+      if (!params.fromShowSolutions) {
+        self.pairId = pair.id;
+      }
 
       self.srcImage = (self.srcImage) ? self.srcImage : self.getImage();
       self.$top = self.$card;
@@ -187,6 +196,7 @@
 
       self.isPaired = true;
 
+      self.trigger('kllStoreSessionState');
       self.resize();
     };
 
@@ -228,6 +238,7 @@
      * @public
      */
     self.detach = function () {
+      delete self.pairId;
       self.isPaired = false;
       self.$card.removeClass('h5p-image-pair-images-paired').empty();
       $('<div class="image-container"></div>').append(self.srcImage).appendTo(
@@ -235,6 +246,7 @@
       self.$card.removeClass('h5p-image-pair-item-selected').addClass(
         'droppable').removeClass('h5p-image-pair-item-hover').droppable(
         "option", "disabled", false);
+      self.trigger('kllStoreSessionState');        
       self.trigger('unpair');
     };
 
@@ -369,17 +381,17 @@
   /**
    * Create audio elements from audio object.
    * @param {object} audio Audio object.
-   * @param {number} id Content id.
+   * @param {number} contentId Content id.
    * @return {object[]} Audio elements.
    */
-  ImagePair.Card.createAudio = function (audio, id) {
+  ImagePair.Card.createAudio = function (audio, contentId) {
     if (!audio || audio.length < 1 || !audio[0].path) {
       return null;
     }
 
     const player = document.createElement('audio');
     player.style.display = 'none';
-    player.src = H5P.getPath(audio[0].path, id);
+    player.src = H5P.getPath(audio[0].path, contentId);
 
     return {
       player: player,

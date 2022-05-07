@@ -1,3 +1,7 @@
+/*
+ * This code really needs refactoring! The original authore made things quite
+ * complicated, and using ES6 would be a blessing ...
+ */
 H5P.ImagePair = (function (EventDispatcher, $, UI) {
 
   /**
@@ -7,7 +11,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
    * @param {Object} parameters
    * @param {Number} id
    */
-  function ImagePair(parameters, id) {
+  function ImagePair(parameters, id, extras) {
     parameters = ImagePair.extend({
       cards: [],
       behaviour: {
@@ -26,6 +30,12 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       }
     }, parameters);
 
+    this.previousState = (extras && extras.previousState) ?
+      extras.previousState :
+      {};
+
+    this.setViewState(this.previousState.viewState || 'task');
+
     // Influence visual behavior
     this.maxColumns = parameters.behaviour.maxColumns || false;
     this.maxColumns = Math.min(this.maxColumns, (parameters.cards || []).length);
@@ -35,10 +45,13 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
 
     // @alias H5P.ImagePair
     var self = this;
+
     // Initialize event inheritance
     EventDispatcher.call(self);
-    var cards = [],
-      mates = [];
+
+    this.cards = [],
+    this.mates = [];
+
     var clicked;
 
     /**
@@ -52,7 +65,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
 
       // Stop all audios
       card.on('stopAudios', function () {
-        cards.forEach(function (card) {
+        self.cards.forEach(function (card) {
           card.stopAudio();
         });
       });
@@ -83,19 +96,19 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       card.on('shiftContainer', function () {
         if (card.isSelected) {
           //select all unpaired mate cards
-          for (var i = 0; i < mates.length; i++) {
-            if (mates[i].isPaired === false) {
-              mates[i].setFocus();
+          for (var i = 0; i < self.mates.length; i++) {
+            if (self.mates[i].isPaired === false) {
+              self.mates[i].setFocus();
               return;
             }
           }
         }
         else {
           // select all paired mate cards
-          for (let i = 0; i < mates.length; i++) {
-            if (mates[i].isPaired === true) {
+          for (let i = 0; i < self.mates.length; i++) {
+            if (self.mates[i].isPaired === true) {
               // focus on the first unpaired mate found
-              mates[i].setFocus();
+              self.mates[i].setFocus();
               return;
             }
           }
@@ -109,10 +122,10 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
           return;
         }
         else {
-          for (var i = 0; i < cards.length; i++) {
+          for (var i = 0; i < self.cards.length; i++) {
             // focus on the first unpaired card
-            if (cards[i].isPaired === false) {
-              cards[i].setFocus();
+            if (self.cards[i].isPaired === false) {
+              self.cards[i].setFocus();
               return;
             }
           }
@@ -156,16 +169,17 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
        */
 
       var createPairChangeFocusHandler = function (direction) {
+        const that = this;
 
         return function () {
 
-          for (var i = 0; i < mates.length; i++) {
+          for (var i = 0; i < that.mates.length; i++) {
             // found the current mate
-            if (mates[i] === mate) {
+            if (that.mates[i] === mate) {
               var nextPair, fails = 0;
               do {
                 fails++;
-                nextPair = mates[i + (direction * fails)];
+                nextPair = that.mates[i + (direction * fails)];
                 if (!nextPair) {
                   return; // No more pairs
                 }
@@ -189,9 +203,10 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
 
 
       var createCardChangeFocusHandler = function (cardtype, direction) {
+        const that = this;
 
         return function () {
-          var list = (cardtype === 1) ? cards : mates;
+          var list = (cardtype === 1) ? that.cards : that.mates;
           var currentItem = (cardtype === 1) ? card : mate;
           for (var i = 0; i < list.length; i++) {
             if (list[i] === currentItem) {
@@ -221,8 +236,10 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
        */
 
       var createEndCardFocusHandler = function (cardtype, direction) {
+        const that = this;
+
         return function () {
-          var list = (cardtype === 1) ? cards : mates;
+          var list = (cardtype === 1) ? that.cards : that.mates;
           var currentItem = (cardtype === 1) ? card : mate;
           var focusSet = false;
           for (var i = 0; i < list.length; i++) {
@@ -247,15 +264,17 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
        * @return {function}
        */
       var createEndPairFocusHandler = function (direction) {
+        const that = this;
+
         return function () {
           var focusSet = false;
-          for (var i = 0; i < mates.length; i++) {
-            var j = (direction === -1 ? mates.length - (i + 1) : i);
-            if (!focusSet && mates[j].isPaired) {
-              mates[j].setFocus();
+          for (var i = 0; i < that.mates.length; i++) {
+            var j = (direction === -1 ? that.mates.length - (i + 1) : i);
+            if (!focusSet && that.mates[j].isPaired) {
+              that.mates[j].setFocus();
               focusSet = true;
             }
-            else if (mates[j] === mate) {
+            else if (that.mates[j] === mate) {
               mate.makeUntabbable();
             }
           }
@@ -286,6 +305,9 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       mate.on('firstPair', createEndPairFocusHandler(1));
       mate.on('lastPair', createEndPairFocusHandler(-1));
 
+      mate.on('kllStoreSessionState', function () {
+        self.trigger('kllStoreSessionState', undefined, { bubbles: true, external: true });
+      });
 
       // while clicking on a matecard in the mateList
       mate.on('selected', function () {
@@ -302,7 +324,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
           self.reverseMateContainer();
         }
 
-        cards.forEach(function (card) {
+        self.cards.forEach(function (card) {
           card.stopAudio();
         });
       });
@@ -323,15 +345,16 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       });
 
       // attach  mate with the clicked card
-      mate.on('attachPair', function () {
+      mate.on('attachPair', function (event) {
         if (mate.$top !== undefined) {
           mate.$top.empty();
         }
-        mate.pair(card);
+        mate.pair(card, event.data);
         mate.setSolved();
       });
-      cards.push(card);
-      mates.push(mate);
+
+      self.cards.push(card);
+      self.mates.push(mate);
     };
 
     /**
@@ -341,13 +364,13 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      */
     var prepareResult = function () {
       var score = 0;
-      for (var i = 0; i < mates.length; i++) {
-        if (mates[i].pairingStatus === true) {
-          mates[i].setCorrect();
+      for (var i = 0; i < self.mates.length; i++) {
+        if (self.mates[i].pairingStatus === true) {
+          self.mates[i].setCorrect();
           score++;
         }
-        else if (mates[i].pairingStatus === false) {
-          mates[i].setIncorrect();
+        else if (self.mates[i].pairingStatus === false) {
+          self.mates[i].setIncorrect();
         }
       }
       return score;
@@ -385,21 +408,21 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      */
     self.prepareMateContainer = function () {
 
-      for (var i = 0; i < mates.length; i++) {
+      for (var i = 0; i < self.mates.length; i++) {
 
         // if element is already paired
-        if (mates[i].isPaired === true) {
+        if (self.mates[i].isPaired === true) {
           //disable paired elements both front and rear
-          mates[i].$front.removeClass('event-enabled').addClass(
+          self.mates[i].$front.removeClass('event-enabled').addClass(
             'visual-disable');
-          mates[i].$rear.removeClass('event-enabled').addClass(
+          self.mates[i].$rear.removeClass('event-enabled').addClass(
             'visual-disable');
-          mates[i].$top.removeClass('event-enabled').addClass(
+          self.mates[i].$top.removeClass('event-enabled').addClass(
             'event-disabled');
         }
         else {
           // if it is not paired, enable it for dropping with a grey dashed border
-          mates[i].$card.removeClass('event-disabled').addClass(
+          self.mates[i].$card.removeClass('event-disabled').addClass(
             'event-enabled').addClass('grey-dash');
         }
       }
@@ -412,23 +435,23 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      */
     self.reverseMateContainer = function () {
 
-      for (var i = 0; i < mates.length; i++) {
+      for (var i = 0; i < self.mates.length; i++) {
 
         // if element is already paired
-        if (mates[i].isPaired === true) {
+        if (self.mates[i].isPaired === true) {
 
           //enable paired elements
-          mates[i].$front.removeClass('visual-disable').addClass(
+          self.mates[i].$front.removeClass('visual-disable').addClass(
             'event-enabled');
-          mates[i].$rear.removeClass('visual-disable').addClass(
+          self.mates[i].$rear.removeClass('visual-disable').addClass(
             'event-enabled');
-          mates[i].$top.removeClass('grey-dash').removeClass(
+          self.mates[i].$top.removeClass('grey-dash').removeClass(
             'event-enabled');
 
         }
         else {
           // disable unpaired elements
-          mates[i].$card.removeClass('event-enabled').addClass(
+          self.mates[i].$card.removeClass('event-enabled').addClass(
             'event-disabled').removeClass('grey-dash');
         }
       }
@@ -451,14 +474,17 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      * @public
      */
     self.showSolution = function () {
+      self.setViewState('solutions');
 
-      self.$showSolutionButton.remove();
-      for (var i = 0; i < mates.length; i++) {
+      if (self.$showSolutionButton) {
+        self.$showSolutionButton.remove();
+      }
 
+      for (var i = 0; i < self.mates.length; i++) {
         //if it is incorrectly paired or not paired at all
-        if (mates[i].pairingStatus !== true) {
-          mates[i].trigger('attachPair');
-          mates[i].pairingStatus = true;
+        if (self.mates[i].pairingStatus !== true) {
+          self.mates[i].trigger('attachPair', { fromShowSolutions: true });
+          self.mates[i].pairingStatus = true;
         }
       }
     };
@@ -468,22 +494,25 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      * @public
      */
     self.retry = function () {
+      self.setViewState('task');
+      self.previousState = {};
+
       // empty the game footer
       self.$footer.empty();
       self.showCheckButton();
-      for (var i = 0; i < mates.length; i++) {
-        if (mates[i].isPaired === true) {
-          mates[i].detach();
-          if (mates[i].currentPair) {
-            mates[i].currentPair.isPaired = false;
+      for (var i = 0; i < self.mates.length; i++) {
+        if (self.mates[i].isPaired === true) {
+          self.mates[i].detach();
+          if (self.mates[i].currentPair) {
+            self.mates[i].currentPair.isPaired = false;
           }
         }
-        cards[i].makeUntabbable();
-        mates[i].makeUntabbable();
+        self.cards[i].makeUntabbable();
+        self.mates[i].makeUntabbable();
       }
 
-      cards[0].setFocus();
-      mates[0].makeTabbable();
+      self.cards[0].setFocus();
+      self.mates[0].makeTabbable();
       self.$footer.appendTo(self.$wrapper);
       self.$gameContainer.removeClass('event-disabled').addClass(
         'event-enabled');
@@ -495,7 +524,10 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      * triggerd when user clicks the check button
      * @public
      */
-    self.displayResult = function () {
+    self.displayResult = function (params) {
+      params = params || {};
+
+      self.setViewState('results');
 
       var result = prepareResult();
       self.$wrapper.find('.event-enabled').removeClass('event-enabled').addClass(
@@ -504,10 +536,10 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       self.$feedbacks = $('<div class="feedback-container" />');
       var scoreText = parameters.l10n.score;
       scoreText = scoreText.replace('@score', result).replace('@total',
-        cards.length);
+        self.cards.length);
       self.$feedbacks.html('<div class="feedback-text">' + scoreText +
         '</div>');
-      self.$progressBar = UI.createScoreBar(cards.length, 'scoreBarLabel');
+      self.$progressBar = UI.createScoreBar(self.cards.length, 'scoreBarLabel');
       self.$progressBar.setScore(result);
       self.$progressBar.appendTo(self.$feedbacks);
       self.$feedbacks.appendTo(self.$footer);
@@ -520,19 +552,21 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       }
 
       // if all cards are not correctly paired
-      if (result != cards.length) {
+      if (result != self.cards.length) {
         self.$showSolutionButton = createButton(self.showSolution,
           'fa-eye', parameters.l10n.showSolution);
         self.$showSolutionButton.appendTo(self.$footer);
       }
 
-      var completedEvent = self.createXAPIEventTemplate('completed');
-      completedEvent.setScoredResult(result, cards.length, self, true,
-        result === cards.length);
-      self.trigger(completedEvent);
+      if (!params.skipXAPI) {
+        var completedEvent = self.createXAPIEventTemplate('completed');
+        completedEvent.setScoredResult(result, self.cards.length, self, true,
+          result === self.cards.length);
+        self.trigger(completedEvent);
+      }
 
       // Emit screenshot
-      setTimeout(function() {
+      setTimeout(function () {
         if (H5P && H5P.KLScreenshot) {
           H5P.KLScreenshot.takeScreenshot(
             self,
@@ -554,17 +588,17 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       var cardParams = cardsToUse[i];
       if (ImagePair.Card.isValid(cardParams)) {
         // Create first card
-        var cardTwo, cardOne = new ImagePair.Card(cardParams.image, id,
+        var cardTwo, cardOne = new ImagePair.Card(i, cardParams.image, id,
           cardParams.imageAlt, cardParams.audio);
 
         if (ImagePair.Card.hasTwoImages(cardParams)) {
           // Use matching image for card two
-          cardTwo = new ImagePair.Card(cardParams.match, id, cardParams.matchAlt, cardParams.matchAudio);
+          cardTwo = new ImagePair.Card(i, cardParams.match, id, cardParams.matchAlt, cardParams.matchAudio);
           cardOne.hasTwoImages = cardTwo.hasTwoImages = true;
         }
         else {
           // Add two cards with the same image
-          cardTwo = new ImagePair.Card(cardParams.image, id, cardParams.imageAlt, cardParams.audio);
+          cardTwo = new ImagePair.Card(i, cardParams.image, id, cardParams.imageAlt, cardParams.audio);
         }
 
         cardOne.on('resize', function () {
@@ -580,9 +614,26 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       }
     }
 
-    // shuffle cards and mates array
-    H5P.shuffleArray(cards);
-    H5P.shuffleArray(mates);
+    if (!this.previousState.cards) {
+      // shuffle cards and mates array
+      H5P.shuffleArray(this.cards);
+      H5P.shuffleArray(this.mates);
+    }
+    else {
+      // Restore cards' previous positions
+      let cardsReordered = [];
+      let matesReordered = [];
+
+      this.previousState.cards.forEach(function (id) {
+        cardsReordered.push(self.cards[id]);
+      });
+      this.cards = cardsReordered;
+
+      this.previousState.mates.forEach(function (mate) {
+        matesReordered.push(self.mates[mate.id]);
+      });
+      this.mates = matesReordered;
+    }
 
     /**
      * Attach this game's html to the given container.
@@ -591,7 +642,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
      */
     self.attach = function ($container) {
 
-      if (!cards.length) {
+      if (!self.cards.length) {
         $container
           .append($('<div class="h5p-image-pair h5p-no-images-provided">')
             .html(parameters.l10n.noImagesProvided));
@@ -641,13 +692,13 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
         parameters.l10n.checkAnswer);
       self.$checkButton.appendTo(self.$footer);
 
-      for (var i = 0; i < cards.length; i++) {
-        cards[i].appendTo(self.$cardList);
-        mates[i].appendTo(self.$mateList);
-        cards[i].$card.attr("data-card", i);
-        cards[i].$card.addClass("draggable");
-        mates[i].$card.addClass('droppable');
-        mates[i].$card.attr("data-mate", i);
+      for (var i = 0; i < self.cards.length; i++) {
+        self.cards[i].appendTo(self.$cardList);
+        self.mates[i].appendTo(self.$mateList);
+        self.cards[i].$card.attr("data-card", i);
+        self.cards[i].$card.addClass("draggable");
+        self.mates[i].$card.addClass('droppable');
+        self.mates[i].$card.attr("data-mate", i);
       }
 
       self.$cardList.find('.draggable').draggable(
@@ -660,7 +711,7 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
           start: function () {
             self.triggerXAPI('interacted');
             var cardId = $(this).data('card');
-            cards[cardId].$card.removeClass(
+            self.cards[cardId].$card.removeClass(
               'h5p-image-pair-item-hover').removeClass(
               'h5p-image-pair-item-selected').addClass(
               'h5p-image-pair-item-disabled');
@@ -669,18 +720,18 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
             self.prepareMateContainer();
 
             // Work around potential issue in jQuery
-            clearTimeout(cards[cardId].cardBlockTimeout);
-            cards[cardId].blocked = true;
+            clearTimeout(self.cards[cardId].cardBlockTimeout);
+            self.cards[cardId].blocked = true;
           },
           stop: function () {
             var cardId = $(this).data('card');
-            cards[cardId].$card.removeClass(
+            self.cards[cardId].$card.removeClass(
               'h5p-image-pair-item-disabled');
             self.reverseMateContainer();
 
             // Work around potential issue in jQuery
-            cards[cardId].cardBlockTimeout = setTimeout(function () {
-              cards[cardId].blocked = false;
+            self.cards[cardId].cardBlockTimeout = setTimeout(function () {
+              self.cards[cardId].blocked = false;
             }, 100);
           }
         });
@@ -689,12 +740,12 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
         tolerance: 'intersect',
         over: function () {
           var mateId = $(this).data('mate');
-          mates[mateId].$card.addClass('h5p-image-pair-item-hover')
+          self.mates[mateId].$card.addClass('h5p-image-pair-item-hover')
             .removeClass('grey-dash').addClass('blue-dash');
         },
         out: function () {
           var mateId = $(this).data('mate');
-          mates[mateId].$card.removeClass(
+          self.mates[mateId].$card.removeClass(
             'h5p-image-pair-item-hover').removeClass('blue-dash')
             .addClass('grey-dash');
         },
@@ -702,19 +753,19 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
           var cardId = $(ui.draggable).data('card');
           var mateId = $(this).data('mate');
 
-          cards.forEach(function (card) {
+          self.cards.forEach(function (card) {
             card.stopAudio();
           });
 
           //for ensuring drag end completes before drop is triggered
           setTimeout(
             function () {
-              cards[cardId].$card.addClass(
+              self.cards[cardId].$card.addClass(
                 'h5p-image-pair-item-disabled');
             }, 0.01);
-          mates[mateId].pair(cards[cardId]);
-          mates[mateId].trigger('checkPair', cards[cardId]);
-          mates[mateId].$card
+          self.mates[mateId].pair(self.cards[cardId]);
+          self.mates[mateId].trigger('checkPair', self.cards[cardId]);
+          self.mates[mateId].$card
             .removeClass('h5p-image-pair-item-hover')
             .removeClass('droppable')
             .removeClass('blue-dash').droppable("option",
@@ -728,10 +779,39 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
         $cardListWrapper.appendTo(self.$gameContainer);
         self.$mateList.appendTo($mateListWrapper);
         $mateListWrapper.appendTo(self.$gameContainer);
-        mates[0].makeTabbable();
-        cards[0].setFocus();
+        self.mates[0].makeTabbable();
+        self.cards[0].setFocus();
         self.$gameContainer.appendTo($container);
         self.$footer.appendTo($container);
+      }
+
+      if (self.previousState.mates) {
+        self.previousState.mates.forEach(function (mate, index) {
+          if (typeof mate.pairId !== 'number') {
+            return;
+          }
+
+          const mateToPair = self.mates[index];
+          const cardToPair = self.getById(self.cards, mate.pairId);
+
+          mateToPair.pair(cardToPair);
+          if (mateToPair.id === cardToPair.id) {
+            mateToPair.pairingStatus = true;
+          }
+          mateToPair.transform(); //transform mate to paired status
+
+          self.reverseMateContainer();
+
+          cardToPair.$card.addClass('h5p-image-pair-item-disabled');
+        });
+      }
+
+      if (self.previousState.viewState === 'results') {
+        self.displayResult({ skipXAPI: true });
+      }
+      else if (self.previousState.viewState === 'solutions') {
+        self.displayResult({ skipXAPI: true });
+        self.showSolution();
       }
     };
 
@@ -739,14 +819,14 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
     this.on('resize', function () {
       const that = this;
 
-      if (!this.maxColumns || !cards.length) {
+      if (!this.maxColumns || !that.cards.length) {
         return; // Leave sizing/wrapping to CSS flex
       }
 
-      const cardWidthFull = cards[0].$card.outerWidth(true);
+      const cardWidthFull = that.cards[0].$card.outerWidth(true);
 
       if (!this.cardInitialWidth) {
-        this.cardInitialWidth = cards[0].$card.width();
+        this.cardInitialWidth = that.cards[0].$card.width();
         this.cardPassepartout = cardWidthFull - this.cardInitialWidth;
       }
 
@@ -755,10 +835,10 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
         this.$cardList.css('max-width', this.maxColumns * cardWidthFull + 'px');
         this.$mateList.css('max-width', this.maxColumns * cardWidthFull + 'px');
 
-        cards.forEach(function (card) {
+        that.cards.forEach(function (card) {
           card.$card.css('max-width', this.cardInitialWidth);
         });
-        mates.forEach(function (card) {
+        that.mates.forEach(function (card) {
           card.$card.css('max-width', this.cardInitialWidth);
         });
 
@@ -771,24 +851,23 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       // Scale cards in order to keep column layout
       if (parameters.behaviour.enforceColumns) {
         const cardSize = Math.floor((that.$cardList.width() - this.maxColumns * this.cardPassepartout) / this.maxColumns) - 2;
-        cards.forEach(function (card) {
+        that.cards.forEach(function (card) {
           card.resize(cardSize);
         });
-        mates.forEach(function (card) {
+        that.mates.forEach(function (card) {
           card.resize(cardSize);
         });
       }
       else {
-        cards.forEach(function (card) {
+        that.cards.forEach(function (card) {
           card.$card.css('min-width', that.cardInitialWidth);
         });
-        mates.forEach(function (card) {
+        that.mates.forEach(function (card) {
           card.$card.css('min-width', that.cardInitialWidth);
         });
       }
     });
   }
-
 
   /**
    * Extend an array just like JQuery's extend.
@@ -814,6 +893,52 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
   // Extends the event dispatcher
   ImagePair.prototype = Object.create(EventDispatcher.prototype);
   ImagePair.prototype.constructor = ImagePair;
+
+  /**
+   * Get card or mate by id.
+   * @param {object[]} types Array of cards or mates.
+   * @param {number} id Id to look for.
+   * @return {object} Card or mate with id.
+   */
+  ImagePair.prototype.getById = function (types, id) {
+    return types.find(function (type) {
+      return type.id === id;
+    });
+  };
+
+  /**
+   * Set view state.
+   * @param {string} state View state.
+   */
+  ImagePair.prototype.setViewState = function (state) {
+    if (ImagePair.VIEW_STATES.indexOf(state) === -1) {
+      return;
+    }
+
+    // Kidsloop Live session storage will listen
+    this.trigger('kllStoreSessionState', undefined, { bubbles: true, external: true });
+
+    this.viewState = state;
+  };
+
+  /**
+   * Get current state.
+   * @return {object} Current state.
+   */
+  ImagePair.prototype.getCurrentState = function () {
+    return {
+      cards: this.cards.map( function (card) {
+        return card.id;
+      }),
+      mates: this.mates.map(function (mate) {
+        return {id: mate.id, pairId: mate.pairId };
+      }),
+      viewState: this.viewState
+    };
+  };
+
+  /** @constant {string[]} view state names*/
+  ImagePair.VIEW_STATES = ['task', 'results', 'solutions'];
 
   return ImagePair;
 
