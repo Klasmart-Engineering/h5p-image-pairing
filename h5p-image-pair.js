@@ -630,9 +630,13 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
       this.cards = cardsReordered;
 
       this.previousState.mates.forEach(function (mate) {
+        self.mates[mate.id].pairingStatus = mate.pairingStatus;
         matesReordered.push(self.mates[mate.id]);
       });
       this.mates = matesReordered;
+
+      // Rebuild previous state in local storage
+      this.trigger('kllStoreSessionState', undefined, { bubbles: true, external: true });
     }
 
     /**
@@ -931,7 +935,11 @@ H5P.ImagePair = (function (EventDispatcher, $, UI) {
         return card.id;
       }),
       mates: this.mates.map(function (mate) {
-        return {id: mate.id, pairId: mate.pairId };
+        return {
+          id: mate.id,
+          pairId: mate.pairId,
+          pairingStatus: (mate.pairId !== undefined) ? (mate.id === mate.pairId) : undefined
+        };
       }),
       viewState: this.viewState
     };
